@@ -151,17 +151,30 @@ fn.def posiciona_vides_jugador(jugador)
   bundle.get jugador, "vida2", quadre_vida_2
   bundle.get jugador, "vida3", quadre_vida_3
   bundle.get jugador, "quadre_numero", quadre_numero_jugador
+  vides = quantes_vides_te(jugador)
   gr.get.value dibuix_jugador, "x", left_jugador
   gr.get.value dibuix_jugador, "y", top_jugador
   bottom_jugador = top_jugador+120
   right_jugador = left_jugador+120
-  left_quadre_1 = (right_jugador+left_jugador)/2-amplada*3/2
+
+  REM calculem la posició dels quadres de vida
+  left_quadre_1 =-50
+  left_quadre_2 =-50
+  left_quadre_3 = -50
   top_quadre_1 = bottom_jugador - amplada - 10
-  print "Posaré vides del jugador. Coord del jugador: ["+str$(left_jugador)+","+str$(top_jugador)+","+str$(right_jugador)+","+str$(bottom_jugador)+")"
-  print "left quadre="+str$(left_quadre_1)+"  top="+str$(top_quadre_1)
+  if (vides>0) then
+    left_quadre_1 = (right_jugador+left_jugador)/2-amplada*3/2
+    if (vides >1) then
+      left_quadre_2 = left_quadre_1+amplada
+      if (vides > 2) then
+        left_quadre_3 = left_quadre_1+amplada*2
+      endif
+    endif
+  endif
+  REM ara posem els quadres
   posiciona_quadre_vida(quadre_vida_1, left_quadre_1, top_quadre_1)
-  posiciona_quadre_vida(quadre_vida_2, left_quadre_1+amplada, top_quadre_1)
-  posiciona_quadre_vida(quadre_vida_3, left_quadre_1+amplada*2, top_quadre_1)
+  posiciona_quadre_vida(quadre_vida_2, left_quadre_2, top_quadre_1)
+  posiciona_quadre_vida(quadre_vida_3, left_quadre_3, top_quadre_1)
   posiciona_quadre_text(quadre_numero_jugador, left_quadre_1, top_jugador)
   fn.rtn 1
 fn.end
@@ -595,6 +608,7 @@ fn.def pot_atacar(jugador)
   else
     pot = 0
   endif
+  print "pot_atacar="+str$(pot)
   fn.rtn pot
 fn.end
 
@@ -632,6 +646,7 @@ fn.def ataca(torn, jugadors[], x,y, so_mort)
   print "El jugador "+str$(torn)+ " ataca al jugador "+str$(jugador_atacat)
   vides=quantes_vides_te(jugadors[jugador_atacat])
   vides =vides - 1
+  print "Al jugador "+str$(jugador_atacat)+" ara li queden +str$(vides)
   set_vides_te(jugadors[jugador_atacat], vides)
   if (vides <= 0)
     REM el jugador està mort
@@ -682,10 +697,10 @@ fn.end
     
 
 dim palillos[2,3]
-audio.load so_palillo, "lluita-mou-palillo.mp3"
-audio.load so_moviment, "lluita-mou-peca.mp3"
-AUDIO.LOAD so_error, "lluita-error.mp3"
-AUDIO.LOAD so_mort, "lluita-mort.mp3"
+audio.load so_palillo, "../../git-projects/lluita-paneroles/resources/lluita-mou-palillo.mp3"
+audio.load so_moviment, "../../git-projects/lluita-paneroles/resources/lluita-mou-peca.mp3"
+AUDIO.LOAD so_error, "../../git-projects/lluita-paneroles/resources/lluita-error.mp3"
+AUDIO.LOAD so_mort, "../../git-projects/lluita-paneroles/resources/lluita-mort.mp3"
 quants=4
 gr.open 255,200,200,200
 taulell=dibuixa_taulell(0)
