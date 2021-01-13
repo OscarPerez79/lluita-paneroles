@@ -83,6 +83,14 @@ fn.def crea_caselles(a)
   fn.rtn caselles
 fn.end
 
+fn.def crea_explosio()
+  gr.bitmap.create explosio, 80,80
+  nom_arxiu$="../../git-projects/lluita-paneroles/resources/atac.jpg"
+  gr.bitmap.load explosio, nom_arxiu$
+  gr.bitmap.draw imatge,explosio, 600, 600
+  fn.rtn imatge
+fn.end
+
 fn.def crea_jugador(quin)
   casella_x = 1
   casella_y = 1
@@ -439,10 +447,14 @@ fn.def mou_jugador(torn, taulell, jugador,p_x,p_y)
   fn.rtn true
 fn.end
 
+fn.def get_coordenades_casella(casella_x, casella_y, x, y)
+  x = 20+(casella_x)*200-120/2-200/2
+  y = 20+(casella_y)*200-120/2-200/2
+  fn.rtn 1
+fn.end
 
 fn.def recolloca_jugador(jugador, casella_x, casella_y)
-  nova_x = 20+(casella_x)*200-120/2-200/2
-  nova_y = 20+(casella_y)*200-120/2-200/2
+  get_coordenades_casella(casella_x, casella_y, &nova_x, &nova_y)
   print "Poso el jugador a les coordenades: x="+str$(nova_x)+"  y="+str$(nova_y)
   bundle.put jugador, "casella_x", casella_x
   bundle.put jugador, "casella_y", casella_y
@@ -633,14 +645,21 @@ fn.def vol_atacar(torn,jugadors[],x,y)
 fn.end
 
 fn.def jugador_ha_mort(jugador, index_jugador_mort,so_mort)
-  play_so(so_mort)
+  audio.play so_mort
   dialog.message "Enhorabona! Has mort el jugador "+str$(index_jugador_mort),,boto
+  do
+    audio.isdone  done
+    if done then d_u.break
+    pause 10
+  until 0
+  audio.stop
   recolloca_jugador(jugador, -100, -100)
   fn.rtn 1
 fn.end
 
 REM fa un atac del jugador[torn] cap al que hi ha a les coordenades (x,y)
 fn.def ataca(torn, jugadors[], x,y, so_mort)
+  valor_retorn=1
   get_casella_a_coordenades(x,y,&casella_x, &casella_y)
   jugador_atacat = jugador_que_hi_ha_a_casella(jugadors[], casella_x, casella_y)
   print "El jugador "+str$(torn)+ " ataca al jugador "+str$(jugador_atacat)
@@ -651,10 +670,11 @@ fn.def ataca(torn, jugadors[], x,y, so_mort)
   if (vides <= 0)
     REM el jugador està mort
     jugador_ha_mort(jugadors[jugador_atacat], torn, so_mort)
+    valor_retorn=2
   endif
   moviments=quants_moviments_te(jugadors[torn])
   set_moviments_te(jugadors[torn], moviments-3)
-  fn.rtn 1
+  fn.rtn valor_retorn
 fn.end
 
 fn.def acabat_torn(jugador)
@@ -689,11 +709,34 @@ fn.def play_so(so)
   do
     audio.isdone  done
     if done then d_u.break
-    pause 100
+    pause 10
   until 0
   audio.stop
   fn.rtn 1
 fn.end
+
+REM fa el so de l'atac i en fa una representació gràfica
+fn.def representa_atac(x,y,so_espasa, imatge_atac)
+  audio.play so_espasa
+  get_casella_a_coordenades(x,y,&casella_x, &casella_y)
+  get_coordenades_casella(casella_x, casella_y, &nova_x, &nova_y)
+  nova_x = nova_x-20
+  nova_y = nova_y-20
+  gr.modify imatge_atac,"x",nova_x
+  gr.modify imatge_atac,"y",nova_y
+  gr.render
+  pause 110
+  gr.modify imatge_atac,"x",-400
+  gr.modify imatge_atac,"y",-400
+  gr.render
+  do
+    audio.isdone  done
+    if done then d_u.break
+    pause 10
+  until 0
+  audio.stop
+  fn.rtn 1
+fn.end  
     
 
 dim palillos[2,3]
@@ -701,6 +744,7 @@ audio.load so_palillo, "../../git-projects/lluita-paneroles/resources/lluita-mou
 audio.load so_moviment, "../../git-projects/lluita-paneroles/resources/lluita-mou-peca.mp3"
 AUDIO.LOAD so_error, "../../git-projects/lluita-paneroles/resources/lluita-error.mp3"
 AUDIO.LOAD so_mort, "../../git-projects/lluita-paneroles/resources/lluita-mort.mp3"
+audio.load so_espasa, "../../git-projects/lluita-paneroles/resources/lluita-espasa.mp3"
 quants=4
 gr.open 255,200,200,200
 taulell=dibuixa_taulell(0)
@@ -714,6 +758,7 @@ REM crea jugadors
     jugadors[i] = crea_jugador(i)
   next i
   REM fi de crea jugadors
+dibuix_explosio = crea_explosio()
 torn=1
 selecciona_torn(torn,jugadors)
 posiciona_vides_tots_jugadors(jugadors[])
@@ -731,7 +776,9 @@ do
       play_so(so_palillo)
     else
       if (vol_atacar(torn,jugadors[],x,y)=1)
-        ataca(torn,jugadors[],x,y, so_mort)
+        if (ataca(torn,jugadors[],x,y, so_mort)=1)
+          representa_atac(x,y,so_espasa, dibuix_explosio)
+        endif
       else  
         tocat_possible = tocat_desti_possible(taulell,jugadors[torn],x,y, palillos[], jugadors[], torn)
         print "tocat_possible="+str$(tocat_possible)
