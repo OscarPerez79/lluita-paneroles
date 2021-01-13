@@ -111,6 +111,12 @@ fn.def crea_jugador(quin)
   gr.rect quadre_vida_1, 10,10,40,40
   gr.rect quadre_vida_2, 10,10,40,40
   gr.rect quadre_vida_3, 10,10,40,40
+  REM poso els numeros de jugadors
+  gr.text.size 24
+  gr.color 255,100,100,100
+  gr.text.draw numero_jugador,10,10, "Jug. "+replace$(str$(quin),".0","")
+
+  REM ara posem els objectes del jugador al bundle
   bundle.create jugador
   bundle.put jugador, "objecte", imatge
   bundle.put jugador, "casella_x", casella_x
@@ -120,6 +126,7 @@ fn.def crea_jugador(quin)
   bundle.put jugador, "vida1", quadre_vida_1
   bundle.put jugador, "vida2", quadre_vida_2
   bundle.put jugador, "vida3", quadre_vida_3
+  bundle.put jugador, "quadre_numero", numero_jugador
   posiciona_vides_jugador(jugador)
   print "Creo el jugador "+str$(quin)+"  x:"+str$(casella_x)+" y:"+str$(casella_y)+"  coordenades: ["+str$(x)+","+str$(y)+"]"
   gr.render
@@ -143,6 +150,7 @@ fn.def posiciona_vides_jugador(jugador)
   bundle.get jugador, "vida1", quadre_vida_1
   bundle.get jugador, "vida2", quadre_vida_2
   bundle.get jugador, "vida3", quadre_vida_3
+  bundle.get jugador, "quadre_numero", quadre_numero_jugador
   gr.get.value dibuix_jugador, "x", left_jugador
   gr.get.value dibuix_jugador, "y", top_jugador
   bottom_jugador = top_jugador+120
@@ -154,8 +162,15 @@ fn.def posiciona_vides_jugador(jugador)
   posiciona_quadre_vida(quadre_vida_1, left_quadre_1, top_quadre_1)
   posiciona_quadre_vida(quadre_vida_2, left_quadre_1+amplada, top_quadre_1)
   posiciona_quadre_vida(quadre_vida_3, left_quadre_1+amplada*2, top_quadre_1)
+  posiciona_quadre_text(quadre_numero_jugador, left_quadre_1, top_jugador)
   fn.rtn 1
 fn.end
+
+fn.def posiciona_quadre_text(quadre_text, left, top)
+  gr.modify quadre_text, "x", left
+  gr.modify quadre_text, "y", top
+  fn.rtn 1
+fn.end  
 
 fn.def posiciona_quadre_vida(quadre_vida, left, top)
   amplada=30
