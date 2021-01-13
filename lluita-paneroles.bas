@@ -103,7 +103,7 @@ fn.def crea_jugador(quin)
   x= 20+200/2-120/2+((casella_x-1)*200)
   y= 20+200/2-120/2+((casella_y-1)*200)
   gr.bitmap.create imatge, 80,80
-  nom_arxiu$="jugador-"+replace$(str$(quin),".0","")+".jpg"
+  nom_arxiu$="../../git-projects/lluita-paneroles/resources/jugador-"+replace$(str$(quin),".0","")+".jpg"
   gr.bitmap.load dibuix, nom_arxiu$
   gr.bitmap.scale dibuix_escalat, dibuix,120,120
   gr.bitmap.draw imatge,dibuix_escalat, x, y
